@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from sqlalchemy import Enum, ForeignKey, create_engine, Column, Integer, String, DateTime, Date
 from enum import Enum as PyEnum
-from sqlalchemy.orm import Mapped, sessionmaker, relationship, declarative_base
+from sqlalchemy.orm import Mapped, sessionmaker, relationship, declarative_base, Session
 from sqlalchemy.sql import func
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./database.db"
@@ -31,29 +31,29 @@ class SourceData(Base):
     id: Mapped[int] = Column(Integer, primary_key=True)
     source_type_id: Mapped[int] = Column(Integer, ForeignKey("source_types.id"))
 
-    class DataTypeEnum(PyEnum):
-        int = 0,
-        float = 1,
-        string = 2,
+    class DataTypeEnum(str, PyEnum):
+        int = "int",
+        float = "float",
+        string = "string",
     data_type: Mapped[DataTypeEnum] = Column(Enum(DataTypeEnum), nullable=False)
-    class DataDisplayEnum(PyEnum):
-        all = 0,
-        truncate = 1,
-        none = 2,
+    class DataDisplayEnum(str, PyEnum):
+        all = "all",
+        truncate = "truncate",
+        none = "none",
     data_display: Mapped[DataDisplayEnum] = Column(Enum(DataDisplayEnum), nullable=False)
 
     data_label:Mapped[str] = Column(String, nullable=True)
-    class DataLabelPosEnum(PyEnum):
-        left = 0,
-        right = 1
-        up = 2
-        down = 3
+    class DataLabelPosEnum(str, PyEnum):
+        left = "left",
+        right = "right"
+        up = "up"
+        down = "down"
     data_label_pos: Mapped[DataLabelPosEnum] = Column(Enum(DataLabelPosEnum), nullable=True)
-    class DataEditEnum(PyEnum):
-        textbox = 0,
-        input = 1,
-        dropdown = 2,
-        slider = 3
+    class DataEditEnum(str, PyEnum):
+        textbox = "textbox",
+        input = "input",
+        dropdown = "dropdown",
+        slider = "slider"
     data_edit: Mapped[DataEditEnum] = Column(Enum(DataEditEnum), nullable=False)
     data_options: Mapped[str] = Column(String, nullable=True)
 
@@ -77,10 +77,10 @@ class StatusGroup(Base):
     id: Mapped[int] = Column(Integer, primary_key=True)
     source_id: Mapped[int] = Column(Integer, ForeignKey('sources.id'), nullable=False)
     name: Mapped[str] = Column(String)
-    class StatusTypeEnum(PyEnum):
-        not_started = 0
-        in_progress = 2
-        complete = 3
+    class StatusTypeEnum(str, PyEnum):
+        not_started = "not_started"
+        in_progress = "in_progress"
+        complete = "complete"
     type: Mapped[StatusTypeEnum] = Column(Enum(StatusTypeEnum))
 
     source: Mapped[Source] = relationship("Source", back_populates="status_groups")
@@ -116,6 +116,13 @@ class Item(Base):
 Base.metadata.create_all(engine)
 
 session = SessionLocal()
+
+def try_commit(session: Session, e: Exception):
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
 
 if __name__ == "__main__":
     from eralchemy import render_er

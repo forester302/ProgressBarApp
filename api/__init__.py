@@ -2,10 +2,15 @@ import importlib
 import pkgutil
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 from database import session
 
 import os
 
+class SimpleRequest(BaseModel):
+    id: int
+
+class SimpleResponse(SimpleRequest): ...
 
 def register(app: FastAPI):
     @app.post("/")
