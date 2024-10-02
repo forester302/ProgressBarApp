@@ -1,0 +1,7 @@
+*.pyc
+
+alembic/
+alembic.ini
+database.db
+
+*.png
