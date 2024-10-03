@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Display</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <input id="source" value="{{source}}" hidden>
+    <template id="row-template">
+        <tr>
+            <td>
+                <input onchange="onItemChange(event)" class="item_name" value="New Item">
+                <input readonly hidden class="item_id">
+                <button type="button" class="open-button"onclick="onOpenRow(event)">Open</button>
+                <button type="button" class="delete-button"onclick="onDeleteRow(event)">Delete</button>
+            </td>
+            
+            <td>
+                <select class="status" onchange="onItemChange(event)">
+                    <!--Dynamically fill this in-->
+                    <!--<option value="0">status</option>-->
+                </select>
+            </td>
+            <td>
+                <input type="date" class="item_date" onchange="onItemChange(event)">
+            </td>
+            <td>
+                <input type="datetime" class="item_updated" readonly>
+            </td>
+            <td>
+                <input type="text" class="item_data" onchange="onItemChange(event)">
+            </td>
+        </tr>
+    </template>
+    <h1>Items</h1>
+    <table id="items">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Date Submitted</th>
+                <th>Last Updated</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <button id="add-item-button">Add Item</button>
+</body>
+
+<script src="../source_x.js"></script>

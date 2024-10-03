@@ -6,7 +6,7 @@ import database as db
 
 from sqlalchemy.orm import Session
 
-from . import SimpleResponse
+from . import SimpleRequest, SimpleResponse
 
 PREFIX = "source-data"
 
@@ -47,17 +47,18 @@ def register(app: FastAPI, session: Session):
         data_label: str
         data_label_pos: db.SourceData.DataLabelPosEnum
         data_edit: db.SourceData.DataEditEnum
-        data_option: str
+        data_options: str
 
     @app.post(f"/{PREFIX}/create", status_code=201)
     async def create_type_data(request: CreateTypeDataRequest) -> SimpleResponse:
         data = db.SourceData()
+        data.source_type_id = request.type_id
         data.data_type = request.data_type
         data.data_display = request.data_display
         data.data_label = request.data_label
         data.data_label_pos = request.data_label_pos
         data.data_edit = request.data_edit
-        data.data_option = request.data_option
+        data.data_options = request.data_options
         session.add(data)
         db.try_commit(session, HTTPException(500, "Database Error"))
         return SimpleResponse(id=data.id)
@@ -69,7 +70,7 @@ def register(app: FastAPI, session: Session):
         data_label: str
         data_label_pos: db.SourceData.DataLabelPosEnum
         data_edit: db.SourceData.DataEditEnum
-        data_option: str
+        data_options: str
     
     @app.post(f"/{PREFIX}/update")
     async def create_type_data(request: UpdateTypeDataRequest):
@@ -80,5 +81,12 @@ def register(app: FastAPI, session: Session):
         data.data_label = request.data_label
         data.data_label_pos = request.data_label_pos
         data.data_edit = request.data_edit
-        data.data_option = request.data_option
+        data.data_options = request.data_options
+        db.try_commit(session, HTTPException(500, "Database Error"))
+
+    @app.post(f"/{PREFIX}/delete")
+    async def delete_type_data(request: SimpleRequest):
+        data = session.query(db.SourceData).filter(db.SourceData.id == request.id).first()
+        if data is None: return # If None data could have already been deleted
+        session.delete(data)
         db.try_commit(session, HTTPException(500, "Database Error"))

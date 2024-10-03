@@ -50,3 +50,10 @@ def register(app: FastAPI, session: Session):
         if type_ is None: raise HTTPException(404, "Type not found")
         type_.name = request.name
         db.try_commit(session, HTTPException(500, "Database Error"))
+
+    @app.post(f"/{PREFIX}/delete")
+    async def delete_type_data(request: SimpleRequest):
+        data = session.query(db.SourceType).filter(db.SourceType.id == request.id).first()
+        if data is None: return # If None data could have already been deleted
+        session.delete(data)
+        db.try_commit(session, HTTPException(500, "Database Error"))

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Display</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <template id="table-template">
+        <div class="source">
+            <input onchange="onTitleChange(event)" class="type_title" value="New Type">
+            <input readonly hidden class="type_id">
+            <button type="button" class="delete-button"onclick="onDeleteTable(event)">Delete</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Data Type</th>
+                        <th>Data Display</th>
+                        <th>Data Label</th>
+                        <th>Data Label Position</th>
+                        <th>Data Edit</th>
+                        <th>Data Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be dynamically added here -->
+                </tbody>
+            </table>
+            <button class="add-row-button">Add Row</button>
+        </div>
+    </template>
+    <template id="row-template">
+        <tr>
+            
+            <td><input class="data_id" readonly>
+                <button type="button" class="delete-button" onclick="onDeleteRow(event)">Delete</button></td> <!-- ID (will be dynamically set) -->
+            <td>
+                <select class="data_type" onchange="onRowUpdate(event)">
+                    <option value="int">int</option>
+                    <option value="string">string</option>
+                    <option value="float">float</option>
+                </select>
+            </td>
+            <td>
+                <select class="data_display" onchange="onRowUpdate(event)">
+                    <option value="all">all</option>
+                    <option value="truncate">truncate</option>
+                    <option value="none">none</option>
+                </select>
+            </td>
+            <td><input class="data_label" type="text" value="" onchange="onRowUpdate(event)"></td>
+            <td>
+                <select class="data_label_pos" onchange="onRowUpdate(event)">
+                    <option value="left">left</option>
+                    <option value="right">right</option>
+                    <option value="up">up</option>
+                    <option value="down">down</option>
+                </select>
+            </td>
+            <td>
+                <select class="data_edit" onchange="onRowUpdate(event)">
+                    <option value="dropdown">dropdown</option>
+                    <option value="input">input</option>
+                    <option value="textbox">textbox</option>
+                    <option value="slider">slider</option>
+                </select>
+            </td>
+            <td><input class="data_options" type="text" value="" onchange="onRowUpdate(event)"></td>
+        </tr>
+    </template>
+    <div id="data-display"></div>
+    <button id="add-table-button">Add Table</button>
+</body>
+
+<script src="type.js"></script>
+</html>

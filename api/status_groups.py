@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from database import StatusGroup
+from database import Source, StatusGroup
 
 from . import SimpleRequest, SimpleResponse
 
@@ -28,7 +28,7 @@ def register(app: FastAPI, session: Session):
         id: int
         source_id: int
         name: str
-        type: str
+        type: StatusGroup.StatusTypeEnum
 
     @app.post(f"/{PREFIX}/all")
     async def get_status_groups() -> list[StatusGroupResponse]:
@@ -59,17 +59,22 @@ def register(app: FastAPI, session: Session):
     
     class UpdateStatusGroupRequest(BaseModel):
         id: int
-        source_id: int
         name: str
         type: StatusGroup.StatusTypeEnum
 
     @app.post(f"/{PREFIX}/update")
-    async def create_status_group(request: UpdateStatusGroupRequest) -> SimpleResponse:
+    async def create_status_group(request: UpdateStatusGroupRequest):
         group = session.query(StatusGroup).filter(StatusGroup.id == request.id).first()
         if group is None: raise HTTPException(404, "Group not found")
-        group.source_id = request.source_id
         group.name = request.name
         group.type = request.type
+        db.try_commit(session, HTTPException(500, "Database Error"))
+
+    @app.post(f"/{PREFIX}/delete")
+    async def delete_status_group(request: SimpleRequest):
+        status_group = session.query(StatusGroup).filter(StatusGroup.id == request.id).first()
+        if status_group is None: return
+        session.delete(status_group)
         db.try_commit(session, HTTPException(500, "Database Error"))
 
     @app.post(f"/{PREFIX}")
@@ -77,3 +82,13 @@ def register(app: FastAPI, session: Session):
         group = session.query(StatusGroup).filter(StatusGroup.id == request.id).first()
         if group is None: raise HTTPException(404, "Group not found")
         return StatusGroupResponse(id=group.id, source_id=group.source_id, name = group.name, type=group.type)
+    
+    @app.post(f"/source/status-groups")
+    async def get_status_groups_from_source(request: list[SimpleRequest]) -> list[StatusGroupResponse]:
+        l = []
+        for s in request:
+            source = session.query(Source).filter(Source.id == s.id).first()
+            if source is None: continue
+            for group in source.status_groups:
+                l.append(StatusGroupResponse(id=group.id, source_id=group.source_id, name = group.name, type=group.type))
+        return l

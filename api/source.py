@@ -39,8 +39,6 @@ def register(app: FastAPI, session: Session):
         type_id: int
         name: str
     
-    class CreateSourceResponse(BaseModel):
-        id: int
 
     @app.post(f"/{PREFIX}/create", status_code=201)
     async def create_source(request: CreateSourceRequest) -> SimpleResponse:
@@ -64,6 +62,13 @@ def register(app: FastAPI, session: Session):
         source.source_type_id = request.type_id
         db.try_commit(session, HTTPException(500, "Database Error"))
 
+    @app.post(f"/{PREFIX}/delete")
+    async def delete_source(request: SimpleRequest):
+        source = session.query(Source).filter(Source.id == request.id).first()
+        if source is None: return
+        session.delete(source)
+        db.try_commit(session, HTTPException(500, "Database Error"))
+
     @app.post(f"/{PREFIX}/items")
     async def get_items_from_source(request: SimpleRequest) -> list[ItemResponse]:
         data = session.query(Source).filter(Source.id == request.id).first()
@@ -72,3 +77,10 @@ def register(app: FastAPI, session: Session):
         for item in data.items:
             l.append(make_item_response(item))
         return l
+    
+    @app.post(f"/{PREFIX}/items/count")
+    async def count_items_from_source(request: SimpleRequest) -> int:
+        data = session.query(Source).filter(Source.id == request.id).first()
+        if data is None: return 0
+        return len(data.items)
+        

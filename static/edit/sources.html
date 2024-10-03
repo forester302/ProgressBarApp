@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Display</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <template id="table-template">
+        <div class="source">
+            <input onchange="onSourceChange(event)" class="source_title" value="New Source">
+            <input readonly hidden class="source_id">
+            <select class="source_type" onchange="onSourceChange(event)">
+                <!--Dynamically fill this in-->
+                <!--<option value="all">all</option>-->
+            </select>
+            <button type="button" class="delete-button"onclick="onDeleteTable(event)">Delete</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+            <button class="add-row-button">Add Row</button>
+        </div>
+    </template>
+    <template id="row-template">
+        <tr>
+            <td>
+                <input class="group_name" type="text" value="" onchange="onGroupRowUpdate(event)">
+                <input readonly hidden class="group_id">
+                <button type="button" class="delete-button" onclick="onDeleteGroupRow(event)">Delete</button>
+            </td>
+            <td>
+                <select class="status_type" onchange="onGroupRowUpdate(event)">
+                    <option value="not_started">Not Started</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="complete_pass">Complete (Success)</option>
+                    <option value="complete_fail">Complete (Failure)</option>
+                </select>
+            </td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    
+                    </tbody>
+                </table>
+                <button class="add-row-button">Add Row</button>
+            </td>
+        </tr>
+    </template>
+    <template id="status-row-template">
+        <tr>
+            <td>
+                <input readonly hidden class="status_id">
+                <input type="text" class="status_name" onchange="onStatusRowUpdate(event)">
+                <button type="button" class="delete-button" onclick="onDeleteStatusRow(event)">Delete</button>
+            </td>
+        </tr>
+    </template>
+    <div id="data-display"></div>
+    <button id="add-source-button">Add Source</button>
+</body>
+
+<script src="source.js"></script>

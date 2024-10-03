@@ -22,7 +22,7 @@ class SourceType(Base):
     name: Mapped[str] = Column(String, nullable=False)
 
     sources: Mapped["Source"] = relationship("Source", back_populates="source_type")
-    source_data: Mapped[list["SourceData"]] = relationship("SourceData", back_populates="source_type")
+    source_data: Mapped[list["SourceData"]] = relationship("SourceData", back_populates="source_type", cascade="all, delete-orphan")
 
 
 class SourceData(Base):
@@ -67,7 +67,7 @@ class Source(Base):
         "source_types.id"), nullable=False)
     name: Mapped[str] = Column(String, nullable=False)
 
-    status_groups: Mapped[list["StatusGroup"]] = relationship("StatusGroup", back_populates="source")
+    status_groups: Mapped[list["StatusGroup"]] = relationship("StatusGroup", back_populates="source", cascade="all, delete-orphan")
     source_type: Mapped[SourceType] = relationship("SourceType", back_populates="sources")
     items: Mapped[list["Item"]] = relationship("Item", back_populates="source")
 
@@ -80,11 +80,12 @@ class StatusGroup(Base):
     class StatusTypeEnum(str, PyEnum):
         not_started = "not_started"
         in_progress = "in_progress"
-        complete = "complete"
+        complete_pass = "complete_pass"
+        complete_fail = "complete_fail"
     type: Mapped[StatusTypeEnum] = Column(Enum(StatusTypeEnum))
 
     source: Mapped[Source] = relationship("Source", back_populates="status_groups")
-    statuses: Mapped[list["Status"]] = relationship("Status", back_populates="status_group")
+    statuses: Mapped[list["Status"]] = relationship("Status", back_populates="status_group", cascade="all, delete-orphan")
 
 class Status(Base):
     __tablename__ = "statuses"
@@ -104,6 +105,7 @@ class Item(Base):
     id: Mapped[int] = Column(Integer, primary_key=True)
     source_id: Mapped[int] = Column(Integer, ForeignKey("sources.id"), nullable=False)
     status_id: Mapped[int] = Column(Integer, ForeignKey("statuses.id"), nullable=False)
+    name: Mapped[str] = Column(String, nullable=False)
 
     date_submitted: Mapped[date] = Column(Date, nullable=True)
     last_updated: Mapped[datetime] = Column(DateTime, nullable=False, default=func.now(), onupdate=func.now())
