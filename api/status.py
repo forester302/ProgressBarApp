@@ -33,6 +33,15 @@ def register(app: FastAPI, session: Session):
             l.append(StatusResponse(id=status.id, status_group_id=status.status_group_id, name=status.name))
         return l
     
+    @app.post(f"/{PREFIX}/filtered")
+    async def get_statuses(request: list[SimpleRequest]) -> list[StatusResponse]:
+        l = []
+        for req in request:
+            status = session.query(Status).filter(Status.id == req.id).first()
+            if status is None: continue
+            l.append(StatusResponse(id=status.id, status_group_id=status.status_group_id, name=status.name))
+        return l
+    
     class CreateStatusRequest(BaseModel):
         status_group_id: int
         name: str

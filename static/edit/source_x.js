@@ -90,7 +90,7 @@ fetch("/source", {
 })
 .then(data => {
     console.log(data, JSON.stringify(data));
-    })
+})
 fetch("/source/status-groups", {
     method: "POST",
     headers: {

@@ -1,1 +1,167 @@
-Hello World!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="edit/style.css">
+    <style>
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 25px;
+            overflow: hidden;
+            height: 30px;
+            display: flex;
+        }
+
+        .progress-segment {
+            height: 100%;
+            border-color: rgb(96, 96, 96);
+            border-right-width: 2px;
+            border-right-style: solid;
+        }
+
+        .not_started {
+            background-color: grey;
+            
+        }
+
+        .in_progress {
+            background-color: blue;
+            border-color: rgb(0, 26, 255);
+        }
+
+        .complete_fail {
+            background-color: red;
+        }
+
+        .complete_pass {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <progress id="progressBar" value="50" max="100"></progress>
+    <div id="progress-container" class="progress-container">
+        <!-- Each div represents a segment of the progress bar -->
+    </div>
+    <div id="data-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Status Name</th>
+                    <th>Status Amount</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template id="template-row">
+                    <tr>
+                        <td class="status_name"></td>
+                        <td class="status_amount"></td>
+                        <td class="status_perc"></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+<script>
+function get_statuses() {
+     
+}
+fetch("/item/all", {
+    method: "POST",
+    headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+    }
+})
+.then(response => {
+    if (!response.ok) {
+        throw Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
+.then(items => {
+    console.log(items);
+    fetch("/source/status-groups", {
+        method: "POST",
+        headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Array.from(new Set(items.map(item => item.source_id))).map(id => ({ id })))
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(status_groups => {
+        console.log(status_groups)
+        for (status_group of status_groups) {
+            status_group.statuses = []
+        }
+        fetch("/status-group/statuses", {
+            method: "POST",
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(status_groups.reduce((acc, currentValue) => {
+                acc.push({id: currentValue.id})
+                return acc
+            }, []))
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(statuses => {
+            console.log(statuses, JSON.stringify(statuses))
+            for (let status of statuses) {
+                status_groups.filter((value) =>  status.status_group_id == value.id)[0].statuses.push(status)
+                status.items = []
+            }
+            for (let item of items) {
+                statuses.filter((value) => item.status_id == value.id)[0].items.push(item)
+            }
+            n_items = items.length
+            bar_data = []
+            const template = document.getElementById('template-row')
+            for (let group of status_groups) {
+                group.statuses.forEach(status => {
+                    const newRowFrag = template.content.cloneNode(true);
+                    const newRow = newRowFrag.firstElementChild;
+                    newRow.querySelector('td.status_name').textContent = status.name;
+                    newRow.querySelector('td.status_amount').textContent = status.items.length;
+                    newRow.querySelector('td.status_perc').textContent = status.items.length / n_items * 100;
+                    newRow.classList.add(group.type)
+                    template.parentElement.appendChild(newRow);
+                    bar_data.push({width: (status.items.length / n_items) * 100, class: group.type})
+                })
+            }
+            console.log(bar_data)
+            const progressBar = document.getElementById('progress-container');
+            bar_data.forEach(segment => {
+                console.log(segment, progressBar)
+                const segmentDiv = document.createElement('div');
+                segmentDiv.className = `progress-segment ${segment.class}`;
+                segmentDiv.style.width = `${segment.width}%`;
+                progressBar.appendChild(segmentDiv); 
+            })
+        })
+    })
+})
+
+// Display how many items in each status there are
+// Calculate how many total items there are
+// display a progress bar
+// Draw each status onto the bar with appropriate length
+</script>

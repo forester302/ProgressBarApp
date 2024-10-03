@@ -38,6 +38,13 @@ def register(app: FastAPI, session: Session):
         if data is None: raise HTTPException(404, "Item not found")
         return make_item_response(data)
     
+    @app.post(f"/{PREFIX}/all")
+    async def get_all_items() -> list[ItemResponse]:
+        l = []
+        for item in session.query(Item):
+            l.append(make_item_response(item))
+        return l
+    
     class CreateItemRequest(BaseModel):
         source_id: int
         status_id: int
