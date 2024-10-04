@@ -18,6 +18,8 @@ function onDeleteRow(event) {
         if (!response.ok) {
             throw Error(`HTTP error! Status: ${response.status}`);
         }
+        row = event.srcElement.closest("tr")
+        row.parentElement.removeChild(row);
     })
 }
 function onItemChange(event) {
